@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLH Links Filter</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  textarea {
+    width: calc(100% - 40px);
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    resize: vertical;
+    font-size: 16px;
+    outline: none;
+  }
+
+  button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  button.clicked,
+  .link.clicked {
+    background-color: black;
+    color: #fff;
+  }
+
+  #output {
+    margin-top: 20px;
+  }
+
+  .link {
+    display: block;
+    margin-bottom: 10px;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+  }
+
+  .link:hover {
+    color: #0056b3;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2 style="text-align: center; color: #007bff; margin-bottom: 20px;">BLH Link Filter Software</h2>
+  <textarea id="inputText" rows="10" placeholder="Enter your lines here"></textarea>
+  <center><button onclick="filterAndDisplay()">Filter and Display Links</button></center>
+  <div id="output"></div>
+  <button id="copyButton" onclick="copyResults()">Copy Results</button>
+</div>
+
+<script>
+  function filterAndDisplay() {
+    var inputText = document.getElementById('inputText').value;
+    var lines = inputText.split('\n');
+    var filteredLines = [];
+    var uniqueLinks = new Set();
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      // Check if the line contains a double quote
+      var quoteIndex = line.indexOf('"');
+      if (quoteIndex !== -1) {
+        // If double quote exists, remove everything after it
+        line = line.substring(0, quoteIndex);
+      }
+      // Check if the line starts with any of the specified URLs
+      if (!line.startsWith("Processing URL:") &&
+          !line.startsWith("Source code downloaded successfully as") &&
+          !line.startsWith("No filtered links found in") &&
+          !line.startsWith("https://www.facebook.com/sharer.php") &&
+          !line.startsWith("https://twitter.com/intent/tweet") &&
+          !line.startsWith("All downloaded source code files deleted.") &&
+          !line.startsWith("Execution time:") &&
+          !line.startsWith("Error occurred:") &&
+          !line.startsWith("Error checking link") &&
+          !line.startsWith("https://www.youtube.com/watch") &&
+          !line.startsWith("https://www.youtube.com/embed") &&
+          !line.startsWith("https://www.youtube.com/playlist") &&
+          !line.startsWith("http://www.linkedin.com/shareArticle")) {
+        var link = line;
+        if (!uniqueLinks.has(link) && link !== '') {
+          uniqueLinks.add(link);
+          filteredLines.push(link);
+        }
+      }
+    }
+
+    var outputDiv = document.getElementById('output');
+    outputDiv.innerHTML = '';
+
+    for (var j = 0; j < filteredLines.length; j++) {
+      var link = document.createElement('a');
+      link.href = filteredLines[j];
+      link.textContent = filteredLines[j];
+      link.classList.add('link');
+      link.target = "_blank"; // Open link in new tab
+      link.addEventListener('click', function() {
+        this.classList.add('clicked');
+      });
+      outputDiv.appendChild(link);
+
+      // Add a button after every 10 links
+      if ((j + 1) % 10 === 0) {
+        var openLinksButton = document.createElement('button');
+        openLinksButton.textContent = 'Open Links';
+        openLinksButton.addEventListener('click', function(links) {
+          return function() {
+            links.forEach(function(link) {
+              window.open(link, '_blank');
+            });
+          };
+        }(filteredLines.slice(j - 9, j + 1)));
+        openLinksButton.addEventListener('click', function() {
+          this.classList.add('clicked');
+        });
+        outputDiv.appendChild(openLinksButton);
+      }
+    }
+  }
+
+  function copyResults() {
+    var outputDiv = document.getElementById('output');
+    var textArea = document.createElement('textarea');
+    textArea.value = outputDiv.innerText;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    alert('Results copied to clipboard!');
+  }
+</script>
+
+</body>
+</html>
